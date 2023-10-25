@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/yohan460/go-jamf-api"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/jc0b/go-jamfpro-api/jamfpro"
 	"os"
 )
 
@@ -21,11 +22,9 @@ type JamfProProvider struct {
 }
 
 type JamfProProviderModel struct {
-	InstanceURL   types.String `tfsdk:"instance_url"`
-	ClientID      types.String `tfsdk:"client_id"`
-	ClientSecret  types.String `tfsdk:"client_secret"`
-	BasicUser     types.String `tfsdk:"basic_user"`
-	BasicPassword types.String `tfsdk:"basic_password"`
+	InstanceURL  types.String `tfsdk:"instance_url"`
+	ClientID     types.String `tfsdk:"client_id"`
+	ClientSecret types.String `tfsdk:"client_secret"`
 }
 
 func (j JamfProProvider) Metadata(ctx context.Context, request provider.MetadataRequest, response *provider.MetadataResponse) {
@@ -37,39 +36,25 @@ func (j JamfProProvider) Schema(ctx context.Context, request provider.SchemaRequ
 	response.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"instance_url": schema.StringAttribute{
-				Required:    true,
+				Optional:    true,
 				Sensitive:   false,
 				Description: "The url of your Jamf Pro instance.",
 				MarkdownDescription: "The url of your Jamf Pro instance (e.g. myinstance.jamfcloud.com)." +
 					"Can also be set with the `JAMF_INSTANCE_URL` environment variable.",
 			},
 			"client_id": schema.StringAttribute{
-				Required:    false,
+				Optional:    true,
 				Sensitive:   true,
 				Description: "A Jamf Pro API Client ID.",
 				MarkdownDescription: "The Client ID of an API Client. Can also be set with the `JAMF_CLIENT_ID`" +
 					"environment variable. Must be used in conjunction with a matching Client Secret.",
 			},
 			"client_secret": schema.StringAttribute{
-				Required:    false,
+				Optional:    true,
 				Sensitive:   true,
 				Description: "A Jamf Pro API Client Secret.",
 				MarkdownDescription: "The Client Secret of an API Client. Can also be set with the `JAMF_CLIENT_SECRET`" +
 					"environment variable. Must be used in conjunction with a matching Client ID.",
-			},
-			"basic_user": schema.StringAttribute{
-				Required:    false,
-				Sensitive:   false,
-				Description: "A Jamf Pro user account username.",
-				MarkdownDescription: "The username of a service account. Can also be set with the `JAMF_BASIC_USER`" +
-					"environment variable. Must be used in conjunction with a matching password.",
-			},
-			"basic_password": schema.StringAttribute{
-				Required:    false,
-				Sensitive:   true,
-				Description: "A Jamf Pro user account password.",
-				MarkdownDescription: "The password of a service account. Can also be set with the `JAMF_BASIC_PASSWORD`" +
-					"environment variable. Must be used in conjunction with a matching username.",
 			},
 		},
 	}
@@ -134,87 +119,30 @@ func (j JamfProProvider) Configure(ctx context.Context, request provider.Configu
 	}
 
 	if data.ClientSecret.IsNull() {
-		clientId = os.Getenv("JAMF_CLIENT_SECRET")
+		tflog.Info(ctx, "Client Secret is NULL")
+		clientSecret = os.Getenv("JAMF_CLIENT_SECRET")
 	} else {
-		clientId = data.ClientSecret.ValueString()
+		clientSecret = data.ClientSecret.ValueString()
 	}
 
-	var apiClient = (clientId == "") == (clientSecret == "")
+	var apiClient = (clientId != "") == (clientSecret != "")
 
 	if !apiClient {
 		response.Diagnostics.AddError(
 			providerConfigurationError,
-			"You must supply both a Client ID and a Client Secret to authenticate.",
-		)
-		return
-	}
-
-	// Client ID & Secret
-	var basicUser string
-	var basicPassword string
-	if data.BasicUser.IsUnknown() {
-		response.Diagnostics.AddWarning(
-			providerConfigurationError,
-			"Cannot use unknown value as username",
-		)
-		return
-	}
-
-	if data.BasicPassword.IsUnknown() {
-		response.Diagnostics.AddWarning(
-			providerConfigurationError,
-			"Cannot use unknown value as password",
-		)
-		return
-	}
-
-	if data.BasicUser.IsNull() {
-		basicUser = os.Getenv("JAMF_BASIC_USER")
-	} else {
-		basicUser = data.BasicUser.ValueString()
-	}
-
-	if data.BasicPassword.IsNull() {
-		basicPassword = os.Getenv("JAMF_BASIC_PASSWORD")
-	} else {
-		basicPassword = data.BasicPassword.ValueString()
-	}
-
-	var basicAuth = (basicUser == "") == (basicPassword == "")
-
-	if !basicAuth {
-		response.Diagnostics.AddError(
-			providerConfigurationError,
-			"You must supply both a username and password to authenticate with basic auth.",
-		)
-		return
-	}
-
-	if !basicAuth && !apiClient {
-		response.Diagnostics.AddError(
-			providerConfigurationError,
-			"You must supply either API Client credentials, or basic auth credentials, to authenticate.")
+			"You must supply API Client credentials to authenticate.")
 	}
 
 	userAgent := fmt.Sprintf("terraform-provider-jamfpro/%s", j.version)
 
-	var c *jamf.Client
+	var c *jamfpro.Client
 	var err error
 
-	if apiClient {
-		c, err = jamf.NewClient(InstanceURL, jamf.WithOAuth(clientId, clientSecret))
-		if err != nil {
-			response.Diagnostics.AddError(
-				"Unable to create client",
-				"Unable to create OAuth client:\n\n"+err.Error())
-		}
-	} else if basicAuth {
-		c, err = jamf.NewClient(InstanceURL, jamf.WithBasicAuth(basicUser, basicPassword))
-		if err != nil {
-			response.Diagnostics.AddError(
-				"Unable to create client",
-				"Unable to create Basic Auth client:\n\n"+err.Error())
-		}
+	c, err = jamfpro.NewClient(clientId, clientSecret, InstanceURL)
+	if err != nil {
+		response.Diagnostics.AddError(
+			"Unable to create client",
+			"Unable to create OAuth client:\n\n"+err.Error())
 	}
 
 	c.ExtraHeader["User-Agent"] = userAgent
@@ -228,7 +156,9 @@ func (j JamfProProvider) DataSources(ctx context.Context) []func() datasource.Da
 }
 
 func (j JamfProProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		NewBuildingResource,
+	}
 }
 
 func New(version string) func() provider.Provider {

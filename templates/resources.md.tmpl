@@ -1,0 +1,14 @@
+---
+page_title: "{{ .Name }} Resource - {{ .ProviderName }}"
+description: |-
+  {{ .Description }}
+---
+
+# {{ .Name }} (Resource)
+
+{{ .Description }}
+{{if eq .HasExample true}}
+## Example Usage
+{{ tffile .ExampleFile }}
+{{ end }}
+{{ .SchemaMarkdown | trimspace }}

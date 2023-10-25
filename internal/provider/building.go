@@ -9,11 +9,11 @@ import (
 type building struct {
 	Id             types.Int64  `tfsdk:"id"`
 	Name           types.String `tfsdk:"name"`
-	StreetAddress1 types.String `tfsdk:"streetAddress1"`
-	StreetAddress2 types.String `tfsdk:"streetAddress1"`
+	StreetAddress1 types.String `tfsdk:"street_address1"`
+	StreetAddress2 types.String `tfsdk:"street_address2"`
 	City           types.String `tfsdk:"city"`
-	StateProvince  types.String `tfsdk:"stateProvince"`
-	ZipPostalCode  types.String `tfsdk:"zipPostalCode"`
+	StateProvince  types.String `tfsdk:"state_province"`
+	ZipPostalCode  types.String `tfsdk:"zip_postal_code"`
 	Country        types.String `tfsdk:"country"`
 }
 
