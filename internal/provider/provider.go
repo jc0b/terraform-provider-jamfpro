@@ -158,6 +158,7 @@ func (j JamfProProvider) DataSources(ctx context.Context) []func() datasource.Da
 func (j JamfProProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewBuildingResource,
+		NewCategoryResource,
 	}
 }
 
