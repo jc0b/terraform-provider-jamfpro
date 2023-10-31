@@ -12,12 +12,12 @@ type category struct {
 	Priority types.Int64  `tfsdk:"priority"`
 }
 
-func categoryForState(b *jamfpro.Category) category {
-	parsedIntId, _ := strconv.ParseInt(b.Id, 10, 64)
+func categoryForState(c *jamfpro.Category) category {
+	parsedIntId, _ := strconv.ParseInt(c.Id, 10, 64)
 
 	return category{
 		Id:       types.Int64Value(parsedIntId),
-		Name:     types.StringValue(b.Name),
-		Priority: types.Int64Value(int64(b.Priority)),
+		Name:     types.StringValue(c.Name),
+		Priority: types.Int64Value(int64(c.Priority)),
 	}
 }
