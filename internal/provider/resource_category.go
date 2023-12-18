@@ -3,10 +3,12 @@ package provider
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/jc0b/go-jamfpro-api/jamfpro"
 )
@@ -66,6 +68,9 @@ func (c *CategoryResource) Schema(ctx context.Context, request resource.SchemaRe
 			"priority": schema.Int64Attribute{
 				Optional:    true,
 				Description: "The Category priority",
+				Validators: []validator.Int64{
+					int64validator.Between(1, 20),
+				},
 			},
 		},
 	}
@@ -94,7 +99,7 @@ func (c *CategoryResource) Create(ctx context.Context, request resource.CreateRe
 		return
 	}
 
-	tflog.Trace(ctx, "created a tag")
+	tflog.Trace(ctx, "created a building")
 
 	// Save data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, categoryForState(category))...)

@@ -154,6 +154,7 @@ func (j JamfProProvider) Configure(ctx context.Context, request provider.Configu
 func (j JamfProProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewCategoryDataSource,
+		NewComputerDataSource,
 	}
 }
 
@@ -161,7 +162,9 @@ func (j JamfProProvider) Resources(ctx context.Context) []func() resource.Resour
 	return []func() resource.Resource{
 		NewBuildingResource,
 		NewCategoryResource,
+		NewComputerGroupResource,
 		NewDepartmentResource,
+		NewSmartComputerGroupResource,
 	}
 }
 

@@ -89,7 +89,7 @@ func (c *DepartmentResource) Create(ctx context.Context, request resource.Create
 		return
 	}
 
-	tflog.Trace(ctx, "created a tag")
+	tflog.Trace(ctx, "created a building")
 
 	// Save data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, departmentForState(department))...)

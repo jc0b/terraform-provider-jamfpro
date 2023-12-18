@@ -15,6 +15,6 @@ func computerForState(c *jamfpro.Computer) computer {
 	return computer{
 		Id:           types.Int64Value(int64(c.Id)),
 		Name:         types.StringValue(c.Name),
-		SerialNumber: types.StringValue(c.General.SerialNumber),
+		SerialNumber: types.StringValue(c.SerialNumber),
 	}
 }

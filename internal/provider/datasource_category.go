@@ -3,8 +3,10 @@ package provider
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/jc0b/go-jamfpro-api/jamfpro"
 )
 
@@ -42,6 +44,9 @@ func (c *CategoryDataSource) Schema(ctx context.Context, request datasource.Sche
 				Description:         "Priority of the category.",
 				MarkdownDescription: "`priority` of the category.",
 				Computed:            true,
+				Validators: []validator.Int64{
+					int64validator.Between(1, 20),
+				},
 			},
 		},
 	}

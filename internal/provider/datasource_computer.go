@@ -32,15 +32,18 @@ func (c *ComputerDataSource) Schema(ctx context.Context, request datasource.Sche
 				Description:         "ID of the computer.",
 				MarkdownDescription: "`ID` of the computer.",
 				Optional:            true,
+				Computed:            true,
 			},
 			"name": schema.StringAttribute{
 				Description:         "Name of the computer.",
 				MarkdownDescription: "`name` of the computer.",
 				Optional:            true,
+				Computed:            true,
 			},
-			"priority": schema.Int64Attribute{
-				Description:         "Priority of the computer.",
-				MarkdownDescription: "`priority` of the computer.",
+			"serial_number": schema.StringAttribute{
+				Description:         "Serial number of the computer.",
+				MarkdownDescription: "`serial_number` of the computer.",
+				Optional:            true,
 				Computed:            true,
 			},
 		},
@@ -59,12 +62,20 @@ func (c *ComputerDataSource) Read(ctx context.Context, request datasource.ReadRe
 
 	var jamfComputer *jamfpro.Computer
 	var err error
-	if data.Id.ValueInt64() > 0 {
+	if !data.Id.IsNull() && data.Id.ValueInt64() != 0 {
 		jamfComputer, _, err = c.client.Computers.GetByID(ctx, int(data.Id.ValueInt64()))
 		if err != nil {
 			response.Diagnostics.AddError(
 				"Client Error",
 				fmt.Sprintf("Unable to get computer with ID '%d', got error: %s", data.Id.ValueInt64(), err),
+			)
+		}
+	} else if data.SerialNumber.ValueString() != "" {
+		jamfComputer, _, err = c.client.Computers.GetBySerialNumber(ctx, data.SerialNumber.ValueString())
+		if err != nil {
+			response.Diagnostics.AddError(
+				"Client Error",
+				fmt.Sprintf("Unable to get computer with serial number '%s', got error: %s", data.SerialNumber.ValueString(), err),
 			)
 		}
 	} else {
@@ -79,6 +90,10 @@ func (c *ComputerDataSource) Read(ctx context.Context, request datasource.ReadRe
 
 	if jamfComputer != nil {
 		response.Diagnostics.Append(response.State.Set(ctx, computerForState(jamfComputer))...)
+	}
+
+	if response.Diagnostics.HasError() {
+		return
 	}
 }
 
@@ -100,4 +115,17 @@ func (c *ComputerDataSource) Configure(ctx context.Context, request datasource.C
 	}
 
 	c.client = client
+}
+
+func (c *ComputerDataSource) ValidateConfig(ctx context.Context, request datasource.ValidateConfigRequest, response *datasource.ValidateConfigResponse) {
+	var data computer
+	diags := request.Config.Get(ctx, &data)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+
+	if data.Id.IsNull() && data.Name.IsNull() && data.SerialNumber.IsNull() {
+		response.Diagnostics.AddError("Invalid `jamfpro_computer` data source", "`id`, `name`, or `serial_number` missing. At least one is required in order to create the data source.")
+	}
 }

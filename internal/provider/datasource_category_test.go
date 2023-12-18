@@ -24,7 +24,7 @@ func TestAccCategoryDataSource(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccTagDataSourceConfig(categoryName, category2Name, priority1, priority2),
+				Config: testAccCategoryDataSourceConfig(categoryName, category2Name, priority1, priority2),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					// Read by name, no taxonomy, default color
 					resource.TestCheckResourceAttrPair(
@@ -45,7 +45,7 @@ func TestAccCategoryDataSource(t *testing.T) {
 	})
 }
 
-func testAccTagDataSourceConfig(categoryOne string, categoryTwo string, priorityOne int, priorityTwo int) string {
+func testAccCategoryDataSourceConfig(categoryOne string, categoryTwo string, priorityOne int, priorityTwo int) string {
 	return fmt.Sprintf(`
 resource "jamfpro_category" "test1" {
   name     = %q

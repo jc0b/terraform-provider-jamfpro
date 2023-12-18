@@ -121,7 +121,7 @@ func (b *BuildingResource) Create(ctx context.Context, request resource.CreateRe
 		return
 	}
 
-	tflog.Trace(ctx, "created a tag")
+	tflog.Trace(ctx, "created a building")
 
 	// Save data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, buildingForState(building))...)

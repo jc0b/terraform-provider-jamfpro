@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/jc0b/go-jamfpro-api/jamfpro"
 	"strconv"
 )
 
@@ -19,4 +20,29 @@ func resourceImportStatePassthroughJamfProID(ctx context.Context, name string, r
 	} else {
 		response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("id"), types.Int64Value(jamfProId))...)
 	}
+}
+
+func AreGroupsEquivalent(planned, actual *jamfpro.ComputerGroup) bool {
+	if actual == nil {
+		return false
+	}
+
+	if planned.Name != actual.Name {
+		return false
+	}
+	if planned.Id != actual.Id {
+		return false
+	}
+	for i, v := range planned.Computers {
+		if v != actual.Computers[i] {
+			return false
+		}
+	}
+	for i, v := range planned.Criteria {
+		if v != actual.Criteria[i] {
+			return false
+		}
+	}
+
+	return true
 }
