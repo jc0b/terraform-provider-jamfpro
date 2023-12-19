@@ -3,12 +3,12 @@
 page_title: "jamfpro_computer Data Source - terraform-provider-jamfpro"
 subcategory: ""
 description: |-
-  The data source jamfpro_computer allows details of a computer to be retrieved by its ID or name.
+  The data source jamfpro_computer allows details of a computer to be retrieved by its ID, name, or serial number.
 ---
 
 # jamfpro_computer (Data Source)
 
-The data source `jamfpro_computer` allows details of a computer to be retrieved by its `ID` or name.
+The data source `jamfpro_computer` allows details of a computer to be retrieved by its `ID`, name, or serial number.
 
 
 
@@ -20,3 +20,7 @@ The data source `jamfpro_computer` allows details of a computer to be retrieved 
 - `id` (Number) `ID` of the computer.
 - `name` (String) `name` of the computer.
 - `serial_number` (String) `serial_number` of the computer.
+
+### Read-Only
+
+- `udid` (String) `udid` of the computer.

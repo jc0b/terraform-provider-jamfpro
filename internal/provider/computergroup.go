@@ -16,6 +16,7 @@ var computerAttrTypes = map[string]attr.Type{
 	"id":            types.Int64Type,
 	"name":          types.StringType,
 	"serial_number": types.StringType,
+	"udid":          types.StringType,
 }
 
 func computerGroupForState(c *jamfpro.ComputerGroup) computergroup {
@@ -29,6 +30,7 @@ func computerGroupForState(c *jamfpro.ComputerGroup) computergroup {
 					"id":            types.Int64Value(int64(machine.Id)),
 					"name":          types.StringValue(machine.Name),
 					"serial_number": types.StringValue(machine.SerialNumber),
+					"udid":          types.StringValue(machine.SerialNumber),
 				},
 			),
 		)
@@ -51,6 +53,7 @@ func computerGroupRequestWithState(data computergroup) *jamfpro.ComputerGroupReq
 					Id:           int(machineMap["id"].(types.Int64).ValueInt64()),
 					Name:         machineMap["name"].(types.String).ValueString(),
 					SerialNumber: machineMap["serial_number"].(types.String).ValueString(),
+					Udid:         machineMap["udid"].(types.String).ValueString(),
 				})
 		}
 	}

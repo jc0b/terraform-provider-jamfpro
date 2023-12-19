@@ -9,6 +9,7 @@ type computer struct {
 	Id           types.Int64  `tfsdk:"id"`
 	Name         types.String `tfsdk:"name"`
 	SerialNumber types.String `tfsdk:"serial_number"`
+	Udid         types.String `tfsdk:"udid"`
 }
 
 func computerForState(c *jamfpro.Computer) computer {
@@ -16,5 +17,6 @@ func computerForState(c *jamfpro.Computer) computer {
 		Id:           types.Int64Value(int64(c.Id)),
 		Name:         types.StringValue(c.Name),
 		SerialNumber: types.StringValue(c.SerialNumber),
+		Udid:         types.StringValue(c.General.Udid),
 	}
 }

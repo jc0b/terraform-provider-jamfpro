@@ -8,12 +8,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccComputerGroupResource(t *testing.T) {
+func TestAccComputerResource(t *testing.T) {
 	Name := acctest.RandString(12)
 	newName := acctest.RandString(12)
 	serialNumber := randomSerialNumber()
-
-	resourceName := "jamfpro_computergroup.test"
+	newSerialNumber := randomSerialNumber()
+	resourceName := "jamfpro_computer.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -21,10 +21,12 @@ func TestAccComputerGroupResource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccComputerGroupResourceConfig(Name, serialNumber),
+				Config: testAccComputerResourceConfig(Name, serialNumber),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						resourceName, "name", Name),
+					resource.TestCheckResourceAttr(
+						resourceName, "serial_number", serialNumber),
 				),
 			},
 			// ImportState
@@ -35,32 +37,23 @@ func TestAccComputerGroupResource(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccComputerGroupResourceConfig(newName, serialNumber),
+				Config: testAccComputerResourceConfig(newName, newSerialNumber),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						resourceName, "name", newName),
+					resource.TestCheckResourceAttr(
+						resourceName, "serial_number", newSerialNumber),
 				),
 			},
 		},
 	})
 }
 
-func testAccComputerGroupResourceConfig(serial_number string, name string) string {
+func testAccComputerResourceConfig(name string, serial_number string) string {
 	return fmt.Sprintf(`
-resource "jamfpro_computer" "test_computer" {
-  name 			= "Test Mac"
+resource "jamfpro_computer" "test" {
+  name     		= %q
   serial_number = %q
 }
-
-resource "jamfpro_computergroup" "test" {
-  name     = %q
-  computers = [resource.jamfpro_computer.test_computer]
-}`, serial_number, name)
+`, name, serial_number)
 }
-
-//
-//{
-//id = data.jamfpro_computer.test_computer.id
-//name = data.jamfpro_computer.test_computer.name
-//serial_number = data.jamfpro_computer.test_computer.serial_number
-//},

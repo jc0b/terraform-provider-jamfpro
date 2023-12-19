@@ -25,7 +25,7 @@ func (c *ComputerDataSource) Metadata(ctx context.Context, request datasource.Me
 func (c *ComputerDataSource) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		Description:         "Allows details of a computer to be retrieved by its ID or name.",
-		MarkdownDescription: "The data source `jamfpro_computer` allows details of a computer to be retrieved by its `ID` or name.",
+		MarkdownDescription: "The data source `jamfpro_computer` allows details of a computer to be retrieved by its `ID`, name, or serial number.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
@@ -44,6 +44,11 @@ func (c *ComputerDataSource) Schema(ctx context.Context, request datasource.Sche
 				Description:         "Serial number of the computer.",
 				MarkdownDescription: "`serial_number` of the computer.",
 				Optional:            true,
+				Computed:            true,
+			},
+			"udid": schema.StringAttribute{
+				Description:         "Hardware UDID of the computer.",
+				MarkdownDescription: "`udid` of the computer.",
 				Computed:            true,
 			},
 		},

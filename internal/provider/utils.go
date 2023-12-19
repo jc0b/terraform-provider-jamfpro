@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/jc0b/go-jamfpro-api/jamfpro"
+	"math/rand"
 	"strconv"
 )
 
@@ -45,4 +46,16 @@ func AreGroupsEquivalent(planned, actual *jamfpro.ComputerGroup) bool {
 	}
 
 	return true
+}
+
+func randomSerialNumber() string {
+	letterBytes := "CDFGHJKLMNPQRSTVWXYZ1234567890"
+	maxLength := 12
+	minLength := 10
+	length := rand.Intn(maxLength-minLength) + minLength
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
 }

@@ -67,7 +67,7 @@ func (c *CategoryResource) Schema(ctx context.Context, request resource.SchemaRe
 			},
 			"priority": schema.Int64Attribute{
 				Optional:    true,
-				Description: "The Category priority",
+				Description: "Priority of the Category. Defaults to 9 if not set.",
 				Validators: []validator.Int64{
 					int64validator.Between(1, 20),
 				},

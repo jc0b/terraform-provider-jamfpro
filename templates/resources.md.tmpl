@@ -5,9 +5,8 @@ description: |-
 ---
 
 # {{ .Name }} (Resource)
-
 {{ .Description }}
-{{if eq .HasExample true}}
+{{ if eq .HasExample true }}
 ## Example Usage
 {{ tffile .ExampleFile }}
 {{ end }}

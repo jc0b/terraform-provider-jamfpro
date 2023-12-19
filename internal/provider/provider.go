@@ -163,6 +163,7 @@ func (j JamfProProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewBuildingResource,
 		NewCategoryResource,
 		NewComputerGroupResource,
+		NewComputerResource,
 		NewDepartmentResource,
 		NewSmartComputerGroupResource,
 	}

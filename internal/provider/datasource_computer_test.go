@@ -8,8 +8,8 @@ import (
 )
 
 func TestAccComputerDataSource(t *testing.T) {
-	computerName := "Jacob’s MacBook Air"
-	computerSerial := "C02J6KH9Q6LR"
+	computerName := "Datasource Test Computer"
+	computerSerial := randomSerialNumber()
 	c1DataSourceName := "data.jamfpro_computer.test1_by_name"
 	c2DataSourceName := "data.jamfpro_computer.test2_by_serial"
 
@@ -37,12 +37,22 @@ func TestAccComputerDataSource(t *testing.T) {
 
 func testAccComputerDataSourceConfig(computerName string, computerSerial string) string {
 	return fmt.Sprintf(`
+resource "jamfpro_computer" "test1" {
+  name     		= %[1]q
+  serial_number = %[2]q
+}
+
+resource "jamfpro_computer" "test2" {
+  name     		= %[1]q
+  serial_number = %[2]q
+}
+
 data "jamfpro_computer" "test1_by_name" {
-  name = %[1]q
+  name = jamfpro_computer.test1.name
 }
 
 data "jamfpro_computer" "test2_by_serial" {
-  serial_number = %[2]q
+  serial_number = jamfpro_computer.test2.serial_number
 }
 `, computerName, computerSerial)
 }

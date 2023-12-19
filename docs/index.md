@@ -11,6 +11,8 @@ management of [Jamf Pro](https://www.jamf.com/products/jamf-pro/) configuration 
 
 ## Example Usage
 
+-----
+A typical provider configuration would look something like:
 ```terraform
 terraform {
   required_providers {

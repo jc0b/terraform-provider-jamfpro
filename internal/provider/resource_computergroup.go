@@ -66,6 +66,12 @@ func (c ComputerGroupResource) Schema(ctx context.Context, request resource.Sche
 							MarkdownDescription: "`serial_number` of the computer.",
 							Optional:            true,
 						},
+						"udid": schema.StringAttribute{
+							Description:         "Hardware UDID of the computer.",
+							MarkdownDescription: "`udid` of the computer.",
+							Computed:            true,
+							Optional:            true,
+						},
 					},
 				},
 			},
