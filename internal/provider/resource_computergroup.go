@@ -114,14 +114,6 @@ func (c *ComputerGroupResource) Create(ctx context.Context, request resource.Cre
 			fmt.Sprintf("Unable to create computergroup, got error: %q)", err.Error()))
 		return
 	}
-	//tflog.Trace(ctx, "Waiting for computergroup to propagate in Jamf")
-	//createdComputerGroup, resp, err := c.client.ComputerGroups.GetByID(ctx, computergroup.Id)
-	//interval := 1
-	//for resp.StatusCode != http.StatusOK && !AreGroupsEquivalent(computergroup, createdComputerGroup) {
-	//	time.Sleep(time.Duration(interval) * time.Second)
-	//	createdComputerGroup, resp, err = c.client.ComputerGroups.GetByID(ctx, computergroup.Id)
-	//	interval = interval * 2
-	//}
 
 	tflog.Trace(ctx, "created a computergroup")
 
@@ -131,7 +123,7 @@ func (c *ComputerGroupResource) Create(ctx context.Context, request resource.Cre
 
 func (c *ComputerGroupResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
 	var data computergroup
-	retryCount := 3
+	retryCount := 5
 	// Read Terraform prior state data into the model
 	response.Diagnostics.Append(request.State.Get(ctx, &data)...)
 
@@ -142,7 +134,7 @@ func (c *ComputerGroupResource) Read(ctx context.Context, request resource.ReadR
 	computergroup, resp, err := c.client.ComputerGroups.GetByID(ctx, int(data.Id.ValueInt64()))
 	if resp.StatusCode == 404 {
 		for resp.StatusCode == 404 && retryCount > 0 {
-			time.Sleep(time.Duration(2) * time.Second)
+			time.Sleep(time.Duration(4) * time.Second)
 			computergroup, resp, err = c.client.ComputerGroups.GetByID(ctx, int(data.Id.ValueInt64()))
 			retryCount = retryCount - 1
 		}

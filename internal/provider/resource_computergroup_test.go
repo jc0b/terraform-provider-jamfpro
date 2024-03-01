@@ -21,7 +21,7 @@ func TestAccComputerGroupResource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccComputerGroupResourceConfig(Name, serialNumber),
+				Config: testAccComputerGroupResourceConfig(serialNumber, Name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						resourceName, "name", Name),
@@ -35,7 +35,7 @@ func TestAccComputerGroupResource(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccComputerGroupResourceConfig(newName, serialNumber),
+				Config: testAccComputerGroupResourceConfig(serialNumber, newName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						resourceName, "name", newName),
@@ -48,19 +48,17 @@ func TestAccComputerGroupResource(t *testing.T) {
 func testAccComputerGroupResourceConfig(serial_number string, name string) string {
 	return fmt.Sprintf(`
 resource "jamfpro_computer" "test_computer" {
-  name 			= "Test Mac"
-  serial_number = %q
+  name 			= "Static Computergroup Test Mac"
+  serial_number = %[1]q
+}
+
+data "jamfpro_computer" "test_computer" {
+  serial_number = %[1]q
+  depends_on = [jamfpro_computer.test_computer]
 }
 
 resource "jamfpro_computergroup" "test" {
-  name     = %q
-  computers = [resource.jamfpro_computer.test_computer]
+  name     = %[2]q
+  computers = [jamfpro_computer.test_computer]
 }`, serial_number, name)
 }
-
-//
-//{
-//id = data.jamfpro_computer.test_computer.id
-//name = data.jamfpro_computer.test_computer.name
-//serial_number = data.jamfpro_computer.test_computer.serial_number
-//},

@@ -60,14 +60,14 @@ resource "jamfpro_smartcomputergroup" "test" {
   name     = %q
   criteria = [
 	{
-		name = %q
-		priority = %d
 		and_or = %q
+		closing_paren = %t
+		name = %q
+		opening_paren = %t
+		priority = %d
 		search_type = %q
 		value = %q
-		opening_paren = %t
-		closing_paren = %t
 	},
   ]
-}`, name, criteria.Name, criteria.Priority, criteria.AndOr, criteria.SearchType, criteria.Value, criteria.OpeningParen, criteria.ClosingParen)
+}`, name, criteria.AndOr, criteria.ClosingParen, criteria.Name, criteria.OpeningParen, criteria.Priority, criteria.SearchType, criteria.Value)
 }

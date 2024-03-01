@@ -10,10 +10,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/jc0b/go-jamfpro-api/jamfpro"
+	"log"
 	"os"
+	"time"
 )
 
 var providerConfigurationError = "Jamf Pro provider configuration error"
+var localSessionStorageFile = "/tmp/jamf-tf-session"
 
 var _ provider.Provider = &JamfProProvider{}
 
@@ -61,6 +64,7 @@ func (j JamfProProvider) Schema(ctx context.Context, request provider.SchemaRequ
 }
 
 func (j JamfProProvider) Configure(ctx context.Context, request provider.ConfigureRequest, response *provider.ConfigureResponse) {
+	fmt.Println("Configuring Jamf Pro Provider...")
 	var data JamfProProviderModel
 
 	response.Diagnostics.Append(request.Config.Get(ctx, &data)...)
@@ -135,14 +139,42 @@ func (j JamfProProvider) Configure(ctx context.Context, request provider.Configu
 
 	userAgent := fmt.Sprintf("terraform-provider-jamfpro/%s", j.version)
 
-	var c *jamfpro.Client
-	var err error
+	jamfSession := ""
+	token, err := os.ReadFile(localSessionStorageFile)
 
-	c, err = jamfpro.NewClient(clientId, clientSecret, InstanceURL)
+	// if the file is populated, read it and pass it
+	// else, its empty string
+
+	if err == nil {
+		info, err := os.Stat(localSessionStorageFile)
+		if info.ModTime().Before(time.Now().Add(time.Minute*30)) && err == nil {
+			jamfSession = string(token)
+		}
+	}
+
+	var c *jamfpro.Client
+
+	c, err = jamfpro.NewClient(clientId, clientSecret, InstanceURL, jamfSession)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Unable to create client",
 			"Unable to create OAuth client:\n\n"+err.Error())
+	}
+
+	if c.GetSessionToken() != jamfSession {
+		f, err := os.Create(localSessionStorageFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		_, err = f.WriteString(c.GetSessionToken() + "\n")
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = f.Sync()
+		if err != nil {
+			return
+		}
 	}
 
 	c.ExtraHeader["User-Agent"] = userAgent

@@ -30,7 +30,7 @@ func computerGroupForState(c *jamfpro.ComputerGroup) computergroup {
 					"id":            types.Int64Value(int64(machine.Id)),
 					"name":          types.StringValue(machine.Name),
 					"serial_number": types.StringValue(machine.SerialNumber),
-					"udid":          types.StringValue(machine.SerialNumber),
+					"udid":          types.StringValue(machine.Udid),
 				},
 			),
 		)

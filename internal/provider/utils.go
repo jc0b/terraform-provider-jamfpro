@@ -9,6 +9,7 @@ import (
 	"github.com/jc0b/go-jamfpro-api/jamfpro"
 	"math/rand"
 	"strconv"
+	"strings"
 )
 
 func resourceImportStatePassthroughJamfProID(ctx context.Context, name string, request resource.ImportStateRequest, response *resource.ImportStateResponse) {
@@ -57,5 +58,5 @@ func randomSerialNumber() string {
 	for i := range b {
 		b[i] = letterBytes[rand.Intn(len(letterBytes))]
 	}
-	return string(b)
+	return strings.ToUpper(string(b))
 }
